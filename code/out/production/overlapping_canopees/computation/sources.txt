@@ -1,0 +1,12 @@
+https://stackoverflow.com/questions/1667310/combined-area-of-overlapping-circles
+(answer of Timothy Shields)
+https://www.benfrederickson.com/calculating-the-intersection-of-3-or-more-circles/
+(Monte Carlo, quadtree, exact)
+https://www.wikihow.com/Calculate-the-Area-of-a-Polygon
+
+With the aid of the algorithm described in Timothy Shields' answer, do:
+1) compute area of (interesting) inner circles, say A1
+2) compute area of (interesting) inner circles AND outer circle, say A2
+3) outer area = A2 - A1
+4) inner area = area of outer circle - outer area
+
