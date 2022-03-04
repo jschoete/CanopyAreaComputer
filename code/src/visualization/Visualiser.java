@@ -1,7 +1,10 @@
 package visualization;
 
+import computation.AreaComputer;
 import computation.montecarlo.MonteCarlo;
+import computation.quadtree.QuadTree;
 import computation.shapes.Shape;
+import computation.shapes.axisaligned.Square;
 import instances.Instances;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Point;
@@ -11,14 +14,13 @@ import io.jbotsim.ui.JTopology;
 import io.jbotsim.ui.JViewer;
 import io.jbotsim.ui.painting.BackgroundPainter;
 import io.jbotsim.ui.painting.UIComponent;
-import visualization.backgroundpainters.PointPainter;
-import visualization.backgroundpainters.ResultsPainter;
-import visualization.backgroundpainters.SampleSizePainter;
-import visualization.backgroundpainters.ShapePainter;
+import visualization.backgroundpainters.*;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,38 +31,40 @@ public class Visualiser implements ClockListener, BackgroundPainter {
 	private Converter c;
 	private Shape outerShape;
 	private List<Shape> innerShapes;
-	private MonteCarlo monteCarlo;
+	private AreaComputer areaComputer;
+//	private MonteCarlo monteCarlo;
 	private Topology tp;
 	private JViewer jv;
 	
 	private ShapePainter shapePainter;
 	private PointPainter pointPainter;
+	private SquarePainter squarePainter;
 	private ResultsPainter resultsPainter;
 	private SampleSizePainter sampleSizePainter;
 	
-	public Visualiser(Shape outerShape, Shape innerShape){
-		this(outerShape, Collections.singletonList(innerShape));
+	public Visualiser(AreaComputer areaComputer){
+		this(areaComputer, false);
 	}
 	
-	public Visualiser(Shape outerShape, List<Shape> innerShapes){
-		this(outerShape, innerShapes, false);
-	}
-	
-	public Visualiser(Shape outerShape, List<Shape> innerShapes, boolean zoom){
-//		tp = new Topology(1000, 800);
+	public Visualiser(AreaComputer areaComputer, boolean zoom){
 		tp = VideoHelper.generateTopology();
+		this.areaComputer = areaComputer;
+		this.outerShape = areaComputer.getOuterShape();
+		this.innerShapes = areaComputer.getInnerShapes();
 		c = new Converter(outerShape, innerShapes, tp, zoom);
-		this.outerShape = outerShape;
-		this.innerShapes = innerShapes;
-		monteCarlo = new MonteCarlo(this.outerShape, this.innerShapes, false);
 		tp.setRefreshMode(CLOCKBASED); //doesn't work, using forced update in onClock()
 		jv = new JViewer(tp);
 		JTopology jtp = jv.getJTopology();
-		pointPainter = new PointPainter();
-		jtp.addBackgroundPainter(pointPainter);
+		if (areaComputer instanceof MonteCarlo){
+			pointPainter = new PointPainter();
+			jtp.addBackgroundPainter(pointPainter);
+		} else if (areaComputer instanceof QuadTree){
+			squarePainter = new SquarePainter();
+			jtp.addBackgroundPainter(squarePainter);
+		}
 		resultsPainter = new ResultsPainter();
 		jtp.addBackgroundPainter(resultsPainter);
-		sampleSizePainter = new SampleSizePainter();
+		sampleSizePainter = new SampleSizePainter(areaComputer);
 		jtp.addBackgroundPainter(sampleSizePainter);
 		shapePainter = new ShapePainter(c.getOuterShape(), c.getInnerShapes());
 		jtp.addBackgroundPainter(shapePainter);
@@ -69,21 +73,62 @@ public class Visualiser implements ClockListener, BackgroundPainter {
 		jtp.addBackgroundPainter(this);
 	}
 	
+//	public Visualiser(Shape outerShape, Shape innerShape){
+//		this(outerShape, Collections.singletonList(innerShape));
+//	}
+//
+//	public Visualiser(Shape outerShape, List<Shape> innerShapes){
+//		this(outerShape, innerShapes, false);
+//	}
+//
+//	public Visualiser(Shape outerShape, List<Shape> innerShapes, boolean zoom){
+////		tp = new Topology(1000, 800);
+//		tp = VideoHelper.generateTopology();
+//		c = new Converter(outerShape, innerShapes, tp, zoom);
+//		this.outerShape = outerShape;
+//		this.innerShapes = innerShapes;
+//		monteCarlo = new MonteCarlo(this.outerShape, this.innerShapes, false);
+//		tp.setRefreshMode(CLOCKBASED); //doesn't work, using forced update in onClock()
+//		jv = new JViewer(tp);
+//		JTopology jtp = jv.getJTopology();
+//		pointPainter = new PointPainter();
+//		jtp.addBackgroundPainter(pointPainter);
+//		resultsPainter = new ResultsPainter();
+//		jtp.addBackgroundPainter(resultsPainter);
+//		sampleSizePainter = new SampleSizePainter(monteCarlo);
+//		jtp.addBackgroundPainter(sampleSizePainter);
+//		shapePainter = new ShapePainter(c.getOuterShape(), c.getInnerShapes());
+//		jtp.addBackgroundPainter(shapePainter);
+//		tp.addClockListener(this);
+//		tp.setTimeUnit(tp.getTimeUnit() / 100); //gotta go fast
+//		jtp.addBackgroundPainter(this);
+//	}
+	
 	@Override
 	public void onClock() {
 		refreshBugWorkaround(); //TODO remove
-		Point2D.Double p1 = outerShape.getRandomPoint();
-		Point p2 = c.convert(p1);
-		long counter = monteCarlo.getInnerPoints();
-		monteCarlo.addPoint(p1);
-		monteCarlo.updateAreas();
-		if (monteCarlo.getInnerPoints() > counter){
-			pointPainter.paintPoint(p2, Colors.canopyPointColor);
-		} else {
-			pointPainter.paintPoint(p2, Colors.nonCanopyPointColor);
+		if (areaComputer instanceof MonteCarlo) {
+			MonteCarlo monteCarlo = (MonteCarlo) areaComputer;
+			Point2D p1 = outerShape.getRandomPoint();
+			Point p2 = c.convert(p1);
+			long counter = monteCarlo.getInnerPoints();
+			monteCarlo.addPoint(p1);
+			monteCarlo.updateAreas();
+			if (monteCarlo.getInnerPoints() > counter) {
+				pointPainter.paintPoint(p2, Colors.canopyPointColor);
+			} else {
+				pointPainter.paintPoint(p2, Colors.nonCanopyPointColor);
+			}
+		} else if (areaComputer instanceof QuadTree){
+			QuadTree quadTree = (QuadTree) areaComputer;
+			quadTree.treatNextSquare();
+			Square square = quadTree.peekQueue();
+			if (quadTree.completelyOutside(square) && quadTree.completelyInsideOuterShape(square)) {
+				squarePainter.paintSquare(c.convert(square));
+			}
 		}
-		resultsPainter.paintResults(monteCarlo.getAreas());
-		sampleSizePainter.increment();
+		resultsPainter.paintResults(areaComputer.getAreas());
+//		sampleSizePainter.increment();
 	}
 	
 	private void refreshBugWorkaround() { //TODO remove
@@ -150,6 +195,9 @@ public class Visualiser implements ClockListener, BackgroundPainter {
 //		new Visualiser(outerShape, innerShapes, true);
 //		new Visualiser(Instances.beehive(), Instances.randomForestCircle(), true);
 //		new Visualiser(Instances.beehive(), Instances.randomForestSquare(), true);
-		new Visualiser(Instances.outer0(), Instances.randomInners(), true);
+//		new Visualiser(Instances.outer0(), Instances.randomInners(), true);
+//		new Visualiser(new QuadTree(Instances.outerDebugging2(), Instances.innersDebugging2(), false), true);
+		new Visualiser(new QuadTree(Instances.outer0(), Instances.randomInners(), false), true);
+//		new Visualiser(new QuadTree(Instances.beehive(), Instances.randomForestSquare(), false), true);
 	}
 }

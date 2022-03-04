@@ -9,5 +9,6 @@ public class Colors {
 //	public static Color canopyPointColor = Color.green;
 	public static Color nonCanopyColor = Color.RED;
 	public static Color nonCanopyPointColor = nonCanopyColor;
-	
+	public static Color quadTreeSquare = nonCanopyColor;
+	public static Color lastQuadTreeSquare = quadTreeSquare;
 }

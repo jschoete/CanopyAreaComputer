@@ -74,6 +74,16 @@ public abstract class AreaComputer {
 		return result;
 	}
 	
+	public Shape getOuterShape(){
+		return outerShape;
+	}
+	
+	public List<Shape> getInnerShapes(){
+		return innerShapes;
+	}
+	
 	public abstract void compute();
+	public abstract double getErrorMargin();
+	public abstract long getSampleSize();
 	
 }

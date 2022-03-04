@@ -378,9 +378,20 @@ public class Exact extends AreaComputer {
 		return result;
 	}
 	
+	@Override
+	public double getErrorMargin() {
+		return 0;
+	}
+	
+	@Override
+	public long getSampleSize() {
+		return 0;
+	}
+	
 	public static void main(String[] args) {
-		AreaComputer ac = new Exact(Instances.beehive(), Instances.randomForestSquare());
-//		AreaComputer ac = new Exact(Instances.outer0(), Instances.randomInners());
+//		AreaComputer ac = new Exact(Instances.beehive(), Instances.randomForestSquare());
+//		AreaComputer ac = new Exact(Instances.outerDebugging2(), Instances.innersDebugging2());
+		AreaComputer ac = new Exact(Instances.outer0(), Instances.randomInners());
 		ac.compute();
 		System.out.println(ac.getInnerArea());
 		System.out.println(ac.getOuterArea());

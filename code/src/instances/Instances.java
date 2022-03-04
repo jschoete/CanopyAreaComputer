@@ -14,7 +14,7 @@ public class Instances {
 		return randomInners(42);
 	}
 	
-	public static List<Shape> randomInners(int n){
+	public static List<Shape> randomInners(int n){ // with outer0 : inner 63.40956080872252 outer 42.273616058038115
 		List<Shape> inners = new ArrayList<>();
 		inners.add(new Circle(0, 0, 1.5));
 		int x = 20;
@@ -124,6 +124,16 @@ public class Instances {
 	public static Shape outerEasy(){
 		Shape outer = new Circle(0, 0, 3);
 		return outer;
+	}
+	
+	public static Shape outerDebugging2(){
+		return new Circle(64, 64, 64);
+	}
+	
+	public static List<Shape> innersDebugging2(){
+		List<Shape> inners = new ArrayList<>();
+		inners.add(new Circle(64, 64, 32));
+		return inners;
 	}
 	
 //	public static List<Shape> innersClement() throws FileNotFoundException {

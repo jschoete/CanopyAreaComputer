@@ -1,5 +1,7 @@
 package computation.shapes;
 
+import computation.shapes.axisaligned.Rectangle;
+
 import java.awt.geom.Point2D;
 
 import static computation.Geometry.computeSignedAngle;
@@ -37,8 +39,8 @@ public class CircleSlice implements Shape {
 	}
 	
 	@Override
-	public boolean contains(Point2D.Double p) {
-		return false;
+	public boolean contains(Point2D p) {
+		return false; //TODO
 	}
 	
 	@Override

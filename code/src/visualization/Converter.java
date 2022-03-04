@@ -1,8 +1,9 @@
 package visualization;
 
 import computation.shapes.Circle;
-import computation.shapes.Rectangle;
+import computation.shapes.axisaligned.Rectangle;
 import computation.shapes.Shape;
+import computation.shapes.axisaligned.Square;
 import io.jbotsim.core.Point;
 import io.jbotsim.core.Topology;
 
@@ -51,28 +52,28 @@ public class Converter {
 		double leftMost = innerShapes.get(0).getCenter().x;
 		double left;
 		for (Shape s : innerShapes){
-			left = s.getBoundingBox().getLeftTopPoint().x;
+			left = s.getBoundingBox().getTopLeftPoint().x;
 			if (left < leftMost)
 				leftMost = left;
 		}
 		double topMost = innerShapes.get(0).getCenter().y;
 		double top;
 		for (Shape s : innerShapes){
-			top = s.getBoundingBox().getLeftTopPoint().y;
+			top = s.getBoundingBox().getTopLeftPoint().y;
 			if (top < topMost)
 				topMost = top;
 		}
 		double rightMost = innerShapes.get(0).getCenter().x;
 		double right;
 		for (Shape s : innerShapes){
-			right = s.getBoundingBox().getRightBottomPoint().x;
+			right = s.getBoundingBox().getBottomRightPoint().x;
 			if (right > rightMost)
 				rightMost = right;
 		}
 		double bottomMost = innerShapes.get(0).getCenter().y;
 		double bottom;
 		for (Shape s : innerShapes){
-			bottom = s.getBoundingBox().getRightBottomPoint().y;
+			bottom = s.getBoundingBox().getBottomRightPoint().y;
 			if (bottom > bottomMost)
 				bottomMost = bottom;
 		}
@@ -97,7 +98,15 @@ public class Converter {
 		return innerShapes;
 	}
 	
-	public Point convert(Point2D.Double p) {
-		return new Point((p.x + preShiftX) * scale + postShiftX, (p.y + preShiftY) * scale + postShiftY);
+	public Point convert(Point2D p) {
+		return new Point((p.getX() + preShiftX) * scale + postShiftX, (p.getY() + preShiftY) * scale + postShiftY);
+	}
+	
+	public List<Point> convert(Square square){
+		List<Point> vertices = new ArrayList<>();
+		for (Point2D v : square.getVertices()){
+			vertices.add(this.convert(v));
+		}
+		return vertices;
 	}
 }

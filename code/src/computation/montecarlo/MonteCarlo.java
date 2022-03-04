@@ -1,6 +1,7 @@
 package computation.montecarlo;
 
 import computation.AreaComputer;
+import computation.DecimalCutter;
 import computation.shapes.Shape;
 
 import java.awt.geom.Point2D;
@@ -12,8 +13,7 @@ public class MonteCarlo extends AreaComputer {
 	private static int sampleSize = 25 * (int)Math.pow(10, 6);
 	
 	private boolean run;
-	private long innerPoints;
-	private long outerPoints;
+	private long innerPoints, outerPoints, totalPoints;
 	
 	public MonteCarlo(Shape outerShape, List<Shape> innerShapes) {
 		this(outerShape, innerShapes, true);
@@ -31,6 +31,7 @@ public class MonteCarlo extends AreaComputer {
 		super(outerShape, innerShapes);
 		this.outerPoints = 0;
 		this.innerPoints = 0;
+		this.totalPoints = 0;
 		this.run = run;
 		if (this.run){
 			compute();
@@ -48,7 +49,7 @@ public class MonteCarlo extends AreaComputer {
 		addPoint(outerShape.getRandomPoint());
 	}
 	
-	public void addPoint(Point2D.Double p){
+	public void addPoint(Point2D p){
 		boolean innerPoint = false;
 		for (Shape innerShape : innerShapes){
 			if (innerShape.contains(p)){
@@ -61,6 +62,7 @@ public class MonteCarlo extends AreaComputer {
 		} else {
 			outerPoints++;
 		}
+		totalPoints++;
 	}
 	
 	public long getInnerPoints(){
@@ -69,6 +71,20 @@ public class MonteCarlo extends AreaComputer {
 	
 	public long getOuterPoints(){
 		return outerPoints;
+	}
+	
+	public long getTotalPoints(){
+		return totalPoints;
+	}
+	
+	@Override
+	public double getErrorMargin(){
+		return 1f / (2.0 * Math.sqrt(totalPoints));
+	}
+	
+	@Override
+	public long getSampleSize() {
+		return totalPoints;
 	}
 	
 	public void updateAreas(){
