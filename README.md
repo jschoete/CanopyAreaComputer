@@ -8,11 +8,11 @@ The heuristic is based on the Monte Carlo method, and can be viewed below.
 The green circles represent trees as seen from above. Inside the red buffer circle two types of areas are considered: the green canopied area, and the red uncanopied area.
 Small buffer circles may represent the reach of fallen fruit from the central tree, while larger buffer circles may represent the reach of its pollen carried by wind or insects, or the territory of a beehive placed in the central tree.
 
-[![MONTE CARLO](https://www.youtube.com/watch?v=YU9S0Aq5FI8/0.jpg)](https://www.youtube.com/watch?v=YU9S0Aq5FI8)
+[![MONTE CARLO](https://github.com/jschoete/CanopyAreaComputer/blob/main/montecarlo.png)](https://www.youtube.com/watch?v=YU9S0Aq5FI8)
 
 The Monte Carlo method is a stochastic method using random data points in the buffer circle, to estimate the ratio between canopy and non-canopy areas in the shape. It comes with some expected garantee of quality of solution, which can be viewed in the video as well. The more random data points, the higher the expected quality. Nevertheless, it can still be arbitrarily wrong, which is what the next method solves.
 
-[![QUADTREE](https://www.youtube.com/watch?v=z4d6dq5VKX0/0.jpg)](https://www.youtube.com/watch?v=z4d6dq5VKX0)
+[![QUADTREE](https://github.com/jschoete/CanopyAreaComputer/blob/main/quadtree.png)](https://www.youtube.com/watch?v=z4d6dq5VKX0)
 
 The Quad Tree algorithm partitions the space into squares, of which the area is easily computed. Squares are inserted only in completely canopy area, or completely non-canopy area. On the boundary between canopy and non-canopy, smaller and smaller squares cover the remaining space, and the boundary area grows smaller and smaller. This is what gives the garanteed approximation result, shown in the video. 
 
